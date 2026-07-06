@@ -1,58 +1,87 @@
 import os
 from dotenv import load_dotenv
+import sys
 from pypdf import PdfReader
 from google import genai
 load_dotenv()
-client = genai.Client(
- api_key = os.getenv("GEMINI_API_KEY")
-)
-input_resume = input("ENTER RESUME HERE")
-reader = PdfReader(input_resume)
-resume_text = ""
-for page in reader.pages:
-    resume_text+=page.extract_text()
+def get_client():
+   api_key = os.getenv("GEMINI_API_KEY")
+   if not api_key:
+       print("ERROR API KEY NOT FOUND.CHECK .env File")
+       sys.exit(1)
+   return genai.Client(api_key=api_key)
+
+def extract_resume():
+    input_resume = input("ENTER RESUME HERE")
+    try:
+        reader = PdfReader(input_resume)
+    except Exception as e:
+        print("ERROR:{e}")
+        sys.exit(1)
+    resume_text = ""
+    for page in reader.pages:
+        resume_text+=page.extract_text()
+    return resume_text
 
 
-prompt = f"""You are an expert AI Resume Reviewer.
+def build_prompt(resume_text):
 
-Analyze the resume provided below.
 
-Generate a professional report with the following sections:
+    prompt = f"""You are an expert AI Resume Reviewer.
 
-1. Candidate Summary (2-3 lines)
+    Analyze the resume provided below.
 
-2. Skills Identified
-- Technical Skills
-- Soft Skills
+    Generate a professional report with the following sections:
 
-3. Strengths
-- List the strongest aspects of the resume.
+    1. Candidate Summary (2-3 lines)
 
-4. Weaknesses
-- Mention missing skills, unclear sections, or improvements.
+   2. Skills Identified
+    - Technical Skills
+    - Soft Skills
 
-5. ATS Score
-Give a score out of 100 and explain why.
+    3. Strengths
+    - List the strongest aspects of the resume.
 
-6. Suggested Improvements
-Provide actionable recommendations to improve the resume.
+    4. Weaknesses
+    - Mention missing skills, unclear sections, or improvements.
 
-7. Suitable Job Roles
-Suggest 5 job roles based on the resume.
+    5. ATS Score
+    Give a score out of 100 and explain why.
 
-8. Interview Questions
-Generate 5 technical or behavioral interview questions based on the resume.
+    6. Suggested Improvements
+    Provide actionable recommendations to improve the resume.
 
-Keep the report professional, concise, and well-organized.
+    7. Suitable Job Roles
+    Suggest 5 job roles based on the resume.
 
-Resume:
+    8. Interview Questions
+    Generate 5 technical or behavioral interview questions based on the resume.
 
-{resume_text}
-"""
-response = client.models.generate_content(
+    Keep the report professional, concise, and well-organized.
+
+    Resume:
+
+    {resume_text}
+    """
+    return prompt
+
+def response_ai(prompt,client):
+
+    response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt
-    )
-print(response.text)
+     )
+    return response.text
+
    
+def main():
+    client = get_client()
+    resume_text = extract_resume()
+    prompt = build_prompt(resume_text)
+    result = response_ai(prompt,client)
+    print(result)
+
+if __name__ == "__main__":
+    main()   
+
 
