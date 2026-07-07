@@ -89,4 +89,4 @@ This app is deployable on [Streamlit Community Cloud](https://share.streamlit.io
 
 ## Author
 
-Built by [Your Name] as part of an AI freelance portfolio.
+Built by DHURV YADAV as part of an AI freelance portfolio.
