@@ -83,6 +83,7 @@ def build_prompt(resume_text, job_Page):
       based on both the resume and the job description.
 
     Keep the report professional, concise, and well-organized.
+    make it breifed and show match score
 
     Job Description:
 
